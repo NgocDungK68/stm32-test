@@ -2,20 +2,22 @@
 #include <Arduino.h>
 
 static int buzzerPin;
-
 static bool active = false;
-static int step = 0;
-static unsigned long lastTime = 0;
+static int beep_count = 0;
+static bool state = false;
+static unsigned long lastToggle = 0;
 
 void buzzer_init(int pin) {
     buzzerPin = pin;
     pinMode(buzzerPin, OUTPUT);
 }
 
-void buzzer_trigger() {
+void buzzer_start() {
     active = true;
-    step = 0;
-    lastTime = millis();
+    beep_count = 0;
+    state = true;
+    digitalWrite(buzzerPin, HIGH);
+    lastToggle = millis();
 }
 
 void buzzer_update() {
@@ -23,21 +25,17 @@ void buzzer_update() {
 
     unsigned long now = millis();
 
-    // mỗi bước 1 giây
-    if (now - lastTime >= 1000) {
-        lastTime = now;
-        step++;
+    if (now - lastToggle >= 1000) {
+        lastToggle = now;
 
-        if (step % 2 == 1) {
-            digitalWrite(buzzerPin, HIGH);
-        } else {
-            digitalWrite(buzzerPin, LOW);
-        }
+        state = !state;
+        digitalWrite(buzzerPin, state ? HIGH : LOW);
 
-        // 3 tiếng => 6 step (on/off)
-        if (step >= 6) {
-            digitalWrite(buzzerPin, LOW);
+        if (!state) beep_count++;
+
+        if (beep_count >= 3) {
             active = false;
+            digitalWrite(buzzerPin, LOW);
         }
     }
 }

@@ -2,7 +2,7 @@
 #define BUZZER_H
 
 void buzzer_init(int pin);
-void buzzer_trigger();
+void buzzer_start();
 void buzzer_update();
 
 #endif
